@@ -13,6 +13,7 @@ begins = 0
 a = 0
 d = 0
 t_b = False
+f_b = True
 work_buf_len = buf_len
 with open("text.txt","r") as file:
     buf = file.read(buf_len)
