@@ -48,6 +48,7 @@ with open("text.txt","r") as file:
                 a += 1
                 begins2 = str(begins)
                 for i in range(len(begins2)):
+                    print('Индекс, с которого начинается серия из двух идущих подряд единиц:')
                     print(d_db[begins2[i]])
         work_buf = ''
         work_buf2 = ''
