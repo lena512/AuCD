@@ -1,1 +1,212 @@
+"""
+Лабораторная работа №3
+С клавиатуры вводится два числа K и N.
+Квадратная матрица А(N,N), состоящая из 4-х равных по размерам подматриц,
+B,C,D,E заполняется случайным образом целыми числами в интервале [-10,10].
+Для тестирования использовать не случайное заполнение,
+а целенаправленное.
+
+Для ИСТд-12 вид матрицы А
+Е В
+D С
+
+Области
+    1
+  4   2
+    3
+
+19. Формируется матрица F следующим образом:
+если в Е количество нулей в нечетных столбцах в области 4,
+умноженное на К больше, чем произведение чисел в нечетных строках в области 1,
+то поменять в С симметрично области 1 и 2 местами,
+иначе В и Е поменять местами несимметрично.
+При этом матрица А не меняется.
+После чего вычисляется выражение: A*F+ K* F T .
+Выводятся по мере формирования А, F и все матричные операции последовательно."""
+
+import random
+
+k = int(input('Введите значения k и n. \nk = '))
+n = int(input('n = '))
+
+#Функция для быстрого вывода любой матрицы
+def print_matrix(mtr, mtr_name, size):
+    print('Матрица ', mtr_name, ': \n')
+    for i in range(size):
+        for j in range(size):
+            print(mtr[i][j], end = " ")
+        print()
+    print()
+
+
+#Ввод матрицы А с клавиатуры
+'''
+print('Введите значения матрицы А построчно от -10 до 10')
+for i in range(n):
+    a=[]
+    for j in range(n):
+        a.append(int(input()))
+    A.append(a)
+'''
+#Используем рандомные значения для матрицы А
+A=[]
+for i in range(n):
+    a=[]
+    for j in range(n):
+        a.append(random.randint(-10,10))
+    A.append(a)
+        
+print_matrix(A,'A',n)
+
+n2 = n//2
+
+n3 = n//2
+n4 = n
+if n % 2 != 0:
+    n3 = n // 2 + 1
+    n4 = n-1
+    
+#Составляем подматрицу Е   
+E=[]
+for i in range(n2):          
+    e=[]
+    for j in range(n2):
+        e.append(int(A[i][j]))
+    E.append(e)
+    
+print_matrix(E,'E',n2)
+
+#Составляем подматрицу В
+B=[]
+for i in range(n2):
+    b=[]
+    for j in range(n3,n):
+        b.append(int(A[i][j]))
+    B.append(b)
+print_matrix(B, 'B', n2)
+
+#Составляем подматрицу D
+D=[]
+for i in range(n3,n):
+    d=[]
+    for j in range(n2):
+        d.append(int(A[i][j]))
+    D.append(d)
+print_matrix(D,'D',n2)
+
+#Составляем подматрицу С
+C=[]
+for i in range(n3,n):
+    c=[]
+    for j in range(n3,n):
+        c.append(int(A[i][j]))
+    C.append(c)
+
+print_matrix(C,'C',n2)
+
+
+s=[] 
+S=[]
+#Находим значения подматрицы Е в области 4
+#Отдельно записываем значения в нечетных столбцах
+for i in range(n2//2):
+    for j in range(i):
+        s.append(E[i][j])
+        if j%2==0:
+            S.append(E[i][j]) 
+            
+for i in range(n2 // 2, n2):
+    for j in range(n2-(i+1)):
+        s.append(E[i][j])
+        if j%2==0:
+            S.append(E[i][j])
+print('Значения подматрицы Е в области 4: ',s)
+print('Значения области 4 в нечетных столбцах:',S)
+
+#Считаем нули в нечетных столбцах
+o=0 
+for i in S:
+    if i==0:
+        o+=1
+print('Количество нулей в нечетных столбцах: ',o)
+print('Количество нулей умноженное на К: ',o*k)
+
+#Находим значения подматрицы Е в области 1
+#Отдельно записываем значения в нечетных строках
+q=[]
+Q=[]
+for i in range(n2 // 2):
+    for j in range(i + 1, n2 - 1 - i):
+        q.append(E[i][j])
+        if i%2==0:
+            Q.append(E[i][j])
+
+print('Значения подматрицы Е в области 1: ', q)
+print('Значения в нечетных строках в области 1' ,Q)
+#Находим произведение значений в нечетных строках
+w=1
+for i in Q:
+    w=w*i
+print('Произведение этих значений: ',w)
+
+F = [[0] * n4 for _ in range(n4)]
+
+#Если условие выполняется, симметрично меняем местами области 1 и 2 подматрицы С    
+if (o*k)>w:
+    c2=C.copy()
+    for i in range(0,n2//2):
+        for j in range(i+1,n2-i-1):
+            c2[i][j], c2[n2-j-1][n2-1-i] =c2[n2-j-1][n2-1-i],  c2[i][j]             
+    print('Условие выпоняется. Симметрично измененные области 1 и 2 подматрицы С')
+    print_matrix(c2, "C", n2)
+    for i in range(n2):
+        for j in range(n2):
+            F[i][j] = E[i][j]
+    for i in range(n2, n4):
+        for j in range(n2):
+            F[i][j] = D[i - n2][j]
+    for i in range(n2, n4):
+        for j in range(n2, n4):
+            F[i][j] = c2[i - n2][j - n2]
+    for i in range(n2):
+        for j in range(n2, n4):
+            F[i][j] = B[i][j - n2]
+    print_matrix(F, "F", n4)
+#Если условие не выполняется: подматрицы В и Е меняем местами несимметрично.
+else:
+    print('Условие не выпоняется. Подматрицы В и Е меняем местами несимметрично.')
+    for i in range(n2):
+        for j in range(n2):
+            F[i][j] = B[i][j]
+    for i in range(n2, n4):
+        for j in range(n2):
+            F[i][j] = D[i-n2][j]
+    for i in range(n2, n4):
+        for j in range(n2, n4):
+            F[i][j] = C[i-n2][j-n2]
+    for i in range(n2):
+        for j in range(n2, n4):
+            F[i][j] = E[i][j-n2]
+    print_matrix(F, "F", n4)
+    
+    
+#Вычисляем выражение: A*F+ K* F T .
+
+A_F = [[0] * n for _ in range(n4)]
+K_FT = [[0] * n for _ in range(n4)]
+m = [[0] * n for _ in range(n4)]
+for i in range(n4):
+    for j in range(n4):
+        A_F[i][j] = A[i][j] * F[i][j]
+for i in range(n4):
+    for j in range(n4):
+        K_FT[i][j] = k * F[j][i]
+for i in range(n4):
+    for j in range(n4):
+        m[i][j] = A_F[i][j] + K_FT[i][j]
+
+print_matrix(m, 'Выражение A*F+ K* F T равно ', n4)
+
+
+
 
