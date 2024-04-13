@@ -1,1 +1,143 @@
+"""
+Лабораторная работа №4
+С клавиатуры вводится два числа K и N.
+Квадратная матрица А(N,N), состоящая из 4-х равных по размерам подматриц,
+B,C,D,E заполняется случайным образом целыми числами в интервале [-10,10].
+Для тестирования использовать не случайное заполнение,
+а целенаправленное.
+
+Для ИСТд-12 вид матрицы А
+Е В
+D С
+Для простоты все индексы в подматрицах относительные. 
+По сформированной матрице F (или ее частям) необходимо вывести не менее 3 разных графиков.
+Программа должна использовать функции библиотек numpy  и mathplotlib
+
+19.Формируется матрица F следующим образом:
+скопировать в нее А и  если в Е количество нулей в нечетных столбцах,
+умноженное на К больше, чем произведение чисел в нечетных строках,
+то поменять местами В и С симметрично,
+иначе В и Е поменять местами несимметрично.
+При этом матрица А не меняется.
+После чего если определитель матрицы А больше суммы диагональных элементов матрицы F,
+то вычисляется выражение: A*AT – K * F^-1,
+иначе вычисляется выражение (A^-1 +G-FТ)*K,
+где G-нижняя треугольная матрица, полученная из А.
+Выводятся по мере формирования А, F
+и все матричные операции последовательно."""
+import random
+import numpy as np
+import matplotlib.pyplot as plt
+import pylab
+
+k = int(input('Введите значения k и n. \nk = '))
+n = int(input('n = '))
+
+n2 = n//2
+n3 = n//2
+n4 = n
+if n % 2 != 0:
+    n3 = n // 2 + 1
+    n4 = n-1
+A=np.random.randint(-10,10,(n,n))
+print('Матрица А: \n',A)
+A1=A.copy()
+E = A1[:n2,:n2]
+print('Подматрица Е: \n',E)
+B=A1[:n2,n3:n]
+print('Подматрица В: \n',B)
+D=A1[n3:n,:n2]
+print('Подматрица D: \n',D)
+C=A1[n3:n,n3:n]
+print('Подматрица С: \n',C)
+
+
+q= [i for i in np.arange(n2) if i%2==0]
+Q=E[:,q]
+print('Нечетные столбцы подматрицы Е: \n',Q)
+Q0=Q[Q==0]
+w=Q0.size              
+print('Количество нулей в нечетных столбцах в подматрице Е, умноженное на К = ',w*k)
+r=E[q,:]
+print('Нечетные строки подматрицы Е: \n',r)
+e = np.prod(r)
+print('Произведение чисел в нечетных строках',e)
+
+B1 = B.copy()
+E1 = E.copy()
+C1 = C.copy()
+if w*k>e:
+    print('Условие выполняется, меняем местами подматрицы В и С симметрично. Получаем матрицу F: \n')
+    A1[n3:n,n3:n]=np.flipud(B1)
+    A1[:n2,n3:n]=np.flipud(C1)
+else:
+    print('Условие не выполняется, меняем местами подматрицы В и Е несимметрично. Получаем матрицу F: \n')
+    A1[:n2,:n2] = B1
+    A1[:n2,n3:n] = E1
+F = A1.copy()
+print(F)
+
+DetA = np.linalg.det(A)
+print('Определительь матрицы А = ',DetA)
+
+F2 = np.fliplr(F)
+S = np.trace(F)+np.trace(F2)
+print('Сумма диагональных элементов матрицы F = ',S)
+
+if DetA > S:
+    AT = np.transpose(A)
+    F_1 = np.linalg.inv(F) 
+    A_AT = np.matmul(A,AT)
+    K_F_1 = F_1 * k
+    answer = A_AT - K_F_1
+    print('Условие выполняется, выражение A*AT – K * F^-1 = \n', answer)
+else:
+    A_1 = np.linalg.inv(A)
+    G = np.tril(A)
+    FT = np.transpose(F)
+    G_FT = G - FT
+    A_G_FT = A_1 + G_FT
+    answer= A_G_FT * k
+    print('Условие не выполняется, выражение (A^-1 +G-FТ)*K = \n', answer)    
+
+
+F3 = F.reshape(-1)
+x = list()
+for i in range(n):
+    for j in range(n):
+        x.append(str(i)+str(j))
+pylab.subplot (2, 2, 1)
+pylab.plot(x,F3, marker='o', markersize=3)
+pylab.xlabel('Индекс элемента') 
+pylab.ylabel('Значение') 
+pylab.title('Первый график')
+
+
+pylab.subplot (2, 2, 2)
+F4 = np.sort(F, axis = None)
+
+pylab.plot(x,F4, color='green', marker='o', markersize=3)
+pylab.xlabel('Индекс элемента') 
+pylab.ylabel('Значение') 
+pylab.title('Второй график')
+
+
+pylab.subplot (2, 2, 3)
+F6=np.max(F, axis = 1)
+print(F6)
+pylab.bar(np.arange(n),F6, color='red')
+pylab.xlabel('Номер строки') 
+pylab.ylabel('Max') 
+pylab.title('Третий график')
+
+pylab.subplot (2, 2, 4)
+F7=np.min(F, axis = 1)
+print(F7)
+pylab.bar(np.arange(n),F7, color='yellow')
+pylab.plot(np.arange(n),F7, color='purple', marker='o', markersize=3)
+pylab.xlabel('Номер строки') 
+pylab.ylabel('Min') 
+pylab.title('Четвертый график')
+
+plt.show()
 
