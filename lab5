@@ -39,7 +39,7 @@ def i_fl(n):
 k=-1
 lastF=1
 def rec_F(n):
-    global last, k
+    global lastF, k
     if n==1:
         return 1
     elif n>1 and n%2==0:
