@@ -13,24 +13,76 @@ F(1) = 1, F(n) = (-1)^n*(F(n–1) /(2n)! - (n + sin(n))),
 '''
 import timeit
 import matplotlib.pyplot as plt
-import math
 import tabulate
+import math
 
-def rec_F(n):
-    if n==1:
+Q=2
+q=2
+def r_fl(n):
+    global q,Q
+    if q==n:
+        return Q
+        q+=1
+    if n==1 or n==0:
         return 1
-    elif n>1 and n%2==0:
-        return (rec_F(n-1) / math.factorial(2*n))- (n + math.sin(n))
-    elif n>1 and n%2!=0:
-        return math.factorial(n)
+    elif n>=2:
+        x=n*r_fl(n-1)
+        return x
+        q+=1
+        Q=x
 
+
+W=2
+w=2
+def i_fl(n):
+    global w,W
+    f=[0]*(n+1)
+    f[1]=1
+    if w==n:
+        f[n]=W
+        w+=1
+    for i in range(2,n+1):
+        f[i]=f[i-1]*i
+        W=f[i]
+        w+=1
+    return f[n]
+
+
+k=-1
+e=1
+E=1
+def rec_F(n):
+    global E,e,k
+    if n==e:
+        return E
+        e+=1
+    elif n>1 and n%2==0:
+        k *= -1
+        x=k*((rec_F(n-1) / r_fl(2*n))- (n + math.sin(n)))
+        E=x
+        return x
+    elif n>1 and n%2!=0:
+        x=r_fl(n)
+        E=x
+        return x
+c=-1
+r=1
+R=1
 def iter_F(n):
+    global c,r,R
     F = [0]*(n+1)
-    F[1]=1
+    if r==n:
+        F[n]=R
+        r+=1
     for i in range(2,n+1,2):
-        F[i] = (F[n-1] / math.factorial(2*n)) - (n + math.sin(n))
+        c*=-1
+        F[i] = c*((F[n-1] / i_fl(2*n)) - (n + math.sin(n)))
+        R=F[i]
+        r+=1
     for i in range(3,n+1,2):
-        F[i] = math.factorial(n)
+        F[i] = i_fl(n)
+        R=F[i]
+        r+=1
     return F[n]
 
 q = list(range(1,51))
@@ -47,12 +99,12 @@ rec_F=[rec_F(n) for n in q]
 print('Таблица:')
 print(tabulate.tabulate({"Значение":rec_F,"Время рекурсиии": rec_time,"Время итерации": iter_time}, headers= 'keys',tablefmt="fancy_grid",showindex = q))
     
-plt.bar(q, rec_time, label='Рекурсия', color='green',alpha=0.9)
-plt.bar(q, iter_time, label='Итерация', color='blue',alpha=0.5)
+
 plt.plot(q, rec_time, color='green', marker='o', markersize=7)
 plt.plot(q, iter_time, color='blue', marker='o', markersize=7)
+plt.bar(q, rec_time, label = 'Рекурсия', color='green')
+plt.bar(q, iter_time, label = 'Итерация', color='blue',alpha=0.5)
 plt.xlabel('n') 
 plt.ylabel('Время') 
 plt.title('График') 
 plt.show()
-
