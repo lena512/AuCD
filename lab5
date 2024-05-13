@@ -28,14 +28,11 @@ def r_fl(n):
     else:
         return n*r_fl(n-1) 
 
-
 def i_fl(n):
     x=1
     for i in range(2,n+1):
         x*=i
     return x
-
-
 
 k=-1
 lastF = 1
