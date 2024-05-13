@@ -49,16 +49,19 @@ def rec_F(n):
         return lastF
 
 c=-1
+lastf=1
 def iter_F(n):
-    global c
+    global c,lastf
     F = [0]*(n+1)
     F[1]=1
     for i in range(2,n+1,2):
         c*=-1
         F[i] = c*((F[n-1] / i_fl(2*n)) - (n + math.sin(n)))
+        lastf=F[i]
     for i in range(3,n+1,2):
         F[i] = i_fl(n)
-    return F[n]
+        lastf=F[i]
+    return lastf
 
 q = list(range(1,51))
 
