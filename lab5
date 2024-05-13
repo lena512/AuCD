@@ -36,28 +36,31 @@ def i_fl(n):
     return x
 
 
+
 k=-1
-lastF=1
+lastF = 1
 def rec_F(n):
     global lastF, k
     if n==1:
         return 1
     elif n>1 and n%2==0:
         k *= -1
-        lastF = k*((rec_F(n-1) / fl(n*2))- (n + math.sin(n)))
+        lastF = k*(( rec_F(n-1) / r_fl(2*n)) - (n + math.sin(n)))
         return lastF
     elif n>1 and n%2!=0:
-        lastF = fl(n)
+        lastF = r_fl(n)
         return lastF
+
 c=-1
 def iter_F(n):
     global c
     F = [0]*(n+1)
+    F[1]=1
     for i in range(2,n+1,2):
         c*=-1
-        F[i] = c*((F[n-1] / fl(2*n)) - (n + math.sin(n)))
+        F[i] = c*((F[n-1] / i_fl(2*n)) - (n + math.sin(n)))
     for i in range(3,n+1,2):
-        F[i] = fl(n)
+        F[i] = i_fl(n)
     return F[n]
 
 q = list(range(1,51))
