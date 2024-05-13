@@ -17,7 +17,7 @@ import tabulate
 import math
 
 q= 1
-def r_fl(n):
+def fl(n):
     global q
     q=n*q
     return q
