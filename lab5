@@ -70,9 +70,9 @@ for n in q:
     time_iter = timeit.timeit(lambda: iter_F(n), number=1)
     iter_time.append(time_iter)
 
-rec_F=[rec_F(n) for n in q]
+recF=[rec_F(n) for n in q]
 print('Таблица:')
-print(tabulate.tabulate({"Значение":rec_F,"Время рекурсиии": rec_time,"Время итерации": iter_time}, headers= 'keys',tablefmt="fancy_grid",showindex = q))
+print(tabulate.tabulate({"Значение":recF,"Время рекурсиии": rec_time,"Время итерации": iter_time}, headers= 'keys',tablefmt="fancy_grid",showindex = q))
     
 
 plt.plot(q, rec_time, color='green', marker='o', markersize=7)
