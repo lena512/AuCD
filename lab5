@@ -16,36 +16,24 @@ import matplotlib.pyplot as plt
 import tabulate
 import math
 
-Q=2
-q=2
+q= 1
 def r_fl(n):
-    global q,Q
-    if q==n:
-        return Q
-        q+=1
+    global q
+    q=n*q
+    return q
+    
+def r_fl(n):
     if n==1 or n==0:
         return 1
-    elif n>=2:
-        x=n*r_fl(n-1)
-        return x
-        q+=1
-        Q=x
+    else:
+        return n*r_fl(n-1) 
 
 
-W=2
-w=2
 def i_fl(n):
-    global w,W
-    f=[0]*(n+1)
-    f[1]=1
-    if w==n:
-        f[n]=W
-        w+=1
+    x=1
     for i in range(2,n+1):
-        f[i]=f[i-1]*i
-        W=f[i]
-        w+=1
-    return f[n]
+        x*=i
+    return x
 
 
 k=-1
