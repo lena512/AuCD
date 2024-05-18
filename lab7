@@ -1,1 +1,128 @@
+'''
+Задание на л.р. №7
+Требуется для своего варианта второй части л.р. №6 (усложненной программы)
+разработать реализацию с использованием графического интерфейса.
+Допускается использовать любую графическую библиотеку питона.  
+Рекомендуется использовать внутреннюю библиотеку питона tkinter.
 
+Вариант 19. Дан список достопримечательностей.
+Сформировать все возможные варианты туристических маршрутов.
+Усложнение: В туристическом маршруте могут быть достопримечательности только указанного типа
+'''
+import itertools
+import timeit
+import tabulate
+from tkinter import *
+from tkinter import ttk
+#часть 2
+d = ['Эрмитаж','Исаакиевский_собор','Спас_на_крови',
+     'Дворцовая_площадь',
+     'Петергоф','Русский_музей']
+c = ['Музей','Музей','Храм','Площадь','Заповедник','Музей']
+
+def F(lst,tipe,s):
+    D=[]
+    for i in range(len(lst)):
+        if tipe[i]==s:
+            D.append(lst[i])
+    return D
+        
+def Mf(lst):
+    combs = []
+    for i in range(1, len(lst)+1):
+        y = [list(x) for x in itertools.combinations(lst, i)]
+        combs.append(y)
+    return combs
+
+def Ma(lst):
+    combs = []
+    n = len(lst)
+    for i in range(1, 2**n):
+        x = [lst[j] for j in range(n) if (i >> j) % 2 == 1]
+        combs.append(x)
+    return combs
+
+
+time_F = timeit.timeit(lambda: (Mf(F(d,c,'Музей'))), number=1)
+time_A = timeit.timeit(lambda: (Ma(F(d,c,'Музей'))), number=1)
+
+
+root = Tk()     
+root.title("Программа 'Составитель маршрутов'")     
+root.geometry("1000x500")   
+root.grid_columnconfigure(0, weight = 1)
+root.grid_rowconfigure(0, weight = 1)
+
+label = Label(text="Составление маршрутов по достопримечательностям") 
+label.pack()   
+
+
+def begin():
+    btn["state"] = ["disabled"]
+    x()
+
+def x():
+    label1 = Label(text="Туристические маршруты по достопримечательностям Санкт-Петербурга",anchor=NW, padx=6, pady=6)
+    b = ttk.Button(text="-->",command=click_btn1)
+    label1.pack()
+    b.pack()
+m=''
+
+s=''
+for i in d:
+    s+= i
+    s+=' '
+
+def click_btn1():
+    global s
+    label9=Label(text="Достопримечательности:",anchor=NW, padx=6, pady=6)
+    label9.pack(anchor="nw")
+
+    s_var = StringVar(value=s)
+    listbox = Listbox(listvariable=s_var)
+    listbox.pack(side=LEFT, fill=BOTH, expand=1)
+      
+    scrollbar = ttk.Scrollbar(orient="vertical", command=listbox.yview)
+    scrollbar.pack(side=LEFT, fill=Y)
+      
+    listbox["yscrollcommand"]=scrollbar.set
+
+    label10=Label(text="Какой тип достопримечательности вы хотите посетить? (Музей, Храм, Заповедник, Площадь)",anchor=NW, padx=6, pady=6)
+    label10.pack(anchor="nw")
+    entry7 = ttk.Entry()
+    entry7.pack(anchor=NW, padx=10, pady=10)     
+    def P():
+        global m
+        m = entry7.get()
+        f()
+    N = ttk.Button(text="->", command=P)
+    N.pack(anchor=NW, padx=6, pady=6)
+
+
+def f():
+    global d,c,m
+    in_del, out_del = " ", " "
+    S = out_del.join([in_del.join([str(ele) for ele in sub]) for sub in Mf(F(d,c,m))])
+
+    S=S.replace(', ',',')
+
+    label13=Label(text="Туристические маршруты:",anchor=NW, padx=6, pady=6)
+    label13.pack(anchor="nw")
+    S_var = StringVar(value=S)
+    listbox = Listbox(listvariable=S_var)
+    listbox.pack(side=LEFT, fill=BOTH, expand=1) 
+    scrollbar = ttk.Scrollbar(orient="vertical", command=listbox.yview)
+    scrollbar.pack(side=LEFT, fill=Y)      
+    listbox["yscrollcommand"]=scrollbar.set
+    g()
+    
+def g():
+    label99=Label(text="Заметки")
+    label99.pack(anchor="nw")
+    text = Text(width=15, height=10)
+    text.pack()
+btn = ttk.Button(text="Начать", command=begin)
+btn.pack()
+
+
+root.mainloop()
