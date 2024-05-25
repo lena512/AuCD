@@ -121,20 +121,22 @@ def Mm(lst):
         for j in combs:
             if combs.count(j)!=1:
                 combs.remove(j)
-            k1=sum(c)
-            k=0
-            u=[]
-            for t in combs:
-                for w in t:
-                    for q in range(len(d)):
-                        if w==d[q]:
-                            k=k+c[q]
-                if k<k1:
-                    k1=k
-                    k=0
-                    u=[]
-                    u.append(w)
-    return u,k1
+    k1=sum(c)
+    k=0
+    combs1=[]
+    for w1 in combs:
+        for w2 in w1:
+            for q in range(len(lst)):
+                if w2==lst[q]:
+                    k=k+c[q]
+        if k<k1:
+            k1=k
+            combs1.append(w2)
+        k=0
+    return combs1,k1
 
 print('Всевозможные маршруты, учитывая ограничение:',Mf(F))
 print('\n Самый дешевый маршрут и его стоимость', Mm(F))
+
+
+
