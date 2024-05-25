@@ -18,7 +18,7 @@
 '''
 import itertools
 import timeit
-import tabulate
+
 #часть 1
 '''
 d = ['Эрмитаж','Исаакиевский собор','Спас на крови',
