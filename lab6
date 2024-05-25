@@ -19,7 +19,6 @@
 import itertools
 import timeit
 import tabulate
-from itertools import combinations
 #часть 1
 '''
 d = ['Эрмитаж','Исаакиевский собор','Спас на крови',
