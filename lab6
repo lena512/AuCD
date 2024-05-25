@@ -12,7 +12,9 @@
 Вариант 19. Дан список достопримечательностей.
 Сформировать все возможные варианты туристических маршрутов.
 
-Усложнение: В туристическом маршруте могут быть только музеи
+Усложнение: Вводится стоимость входных билетов.
+В туристическом маршруте стоимость билета на достопримечательность не должна превышать 500 рублей
+Целевая функция: Самый дешевый маршрут 
 '''
 import itertools
 import timeit
@@ -68,15 +70,15 @@ print('Время вычисления с помощью функций пито
 d = ['Эрмитаж','Исаакиевский собор','Спас на крови',
      'Дворцовая площадь',
      'Петергоф','Русский музей']
-c = ['Музей','Музей','Храм','Площадь','Заповедник','Музей']
+c = [500,250,450,0,600,550]
 
-def F(lst,tipe,s):
+def F(lst,p,s):
     D=[]
     for i in range(len(lst)):
-        if tipe[i]==s:
+        if p[i]<=s:
             D.append(lst[i])
     return D
-F=F(d,c,'Музей')        
+F=F(d,c,500)        
 
 def Mf(lst):
     combs = []
@@ -108,16 +110,32 @@ def R(array, num):
             l.append([emptyArray]+x)
     return l
 
-def MF(lst):
-    y = [list(x) for x in itertools.permutations(lst, len(lst))]
-    for j in y:
-        if y.count(j)!=1:
-            y.remove(j)    
-    return y
-
-print('Всевозможные маршруты, учитывая ограничение:',Mf(F))
-print('\n Целевая функция:', MF(F))
-
 time_F = timeit.timeit(lambda: (Mf(F)), number=1)
 time_A = timeit.timeit(lambda: (Ma(F)), number=1)
 
+def Mm(lst):
+    global c, d
+    combs = []
+    for i in range(1, len(lst)+1):
+        y = [list(x) for x in itertools.permutations(lst, i)]
+        combs.append(y)
+        for j in combs:
+            if combs.count(j)!=1:
+                combs.remove(j)
+            k1=sum(c)
+            k=0
+            u=[]
+            for t in combs:
+                for w in t:
+                    for q in range(len(d)):
+                        if w==d[q]:
+                            k=k+c[q]
+                if k<k1:
+                    k1=k
+                    k=0
+                    u=[]
+                    u.append(w)
+    return u,k1
+
+print('Всевозможные маршруты, учитывая ограничение:',Mf(F))
+print('\n Самый дешевый маршрут и его стоимость', Mm(F))
