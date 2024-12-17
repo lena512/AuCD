@@ -80,7 +80,7 @@ class TicTacToe:
             self.maps[x * 3 + y] = self.current_player  
 
             if self.check_winner(self.current_player):
-                showinfo("Победа", f"Игрок {self.current_player} победил!")
+                showinfo("Победа", "Игрок О победил!")
                 self.reset_game()
             elif self.is_draw():
                 showinfo("Ничья", "Игра закончилась вничью!")
@@ -135,7 +135,7 @@ class TicTacToe:
             step = self.check_line(1, 0)
         if step == "":
             if self.maps[4] == "":
-                step = 4  # Центр
+                step = 4  
         if step == "":
             for i in range(9):
                 if self.maps[i] == "":
@@ -150,3 +150,4 @@ if __name__ == "__main__":
     root = Tk()
     app = TicTacToe(root)
     root.mainloop()
+
