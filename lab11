@@ -1,1 +1,124 @@
 
+
+import tkinter as tk
+import random
+
+class MineSweeper:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Сапёр")
+        self.create_menu()
+        self.is_game_over = False
+
+    def create_menu(self):
+        self.menu_frame = tk.Frame(self.root)
+        self.menu_frame.pack()
+        tk.Label(self.menu_frame, text="Сапёр", font=("Comic Sans MS", 50), foreground="#4F4F4F").pack(pady=10)
+
+        start_button = tk.Button(self.menu_frame, text="ИГРАТЬ",font=("Ink Free", 20), command=self.start_game,activebackground="#E9967A", bd=3, bg="#EEE8CD", padx=10, pady=5, width=15)
+        start_button.pack(pady=5)
+
+        exit_button = tk.Button(self.menu_frame, text="ВЫЙТИ ИЗ ИГРЫ",font=("Ink Free", 20), command=self.root.quit, activebackground="#E9967A", anchor="center", bd=3, bg="#EEE8CD", padx=10, pady=5, width=15)
+        exit_button.pack(pady=5)
+
+    def start_game(self):
+        self.menu_frame.pack_forget()
+        self.create_game_board()
+
+    def create_game_board(self):
+        self.board_frame = tk.Frame(self.root)
+        self.board_frame.pack()
+        self.buttons = {}
+        self.mines = self.place_mines()
+        self.adjacency_counts = self.calculate_adjacency_counts()
+        self.revealed_cells = 0
+
+        for row in range(10):
+            for col in range(10):
+                button = tk.Button(self.board_frame, text="", width=3, command=lambda r=row, c=col: self.reveal(r, c))
+                button.bind('<Button-3>', lambda event, r=row, c=col: self.toggle_flag(r, c))  # Правый клик для флага
+                button.grid(row=row, column=col)
+                self.buttons[(row, col)] = button
+
+        self.back_button = tk.Button(self.board_frame, text="Назад", font=("Ink Free", 15), activebackground="#E9967A", bd=3, bg="#EEE8CD", padx=10, pady=5, width=15, command=self.back_to_menu)
+        self.back_button.grid(row=40, column=10)
+
+    def back_to_menu(self):
+        self.board_frame.pack_forget()
+
+        self.create_menu()
+
+    def place_mines(self):
+        mines = set()
+        while len(mines) < 10:
+            mine_position = (random.randint(0, 9), random.randint(0, 9))
+            if mine_position not in mines:
+                mines.add(mine_position)
+        return mines
+
+    def calculate_adjacency_counts(self):
+        counts = {}
+        for row in range(10):
+            for col in range(10):
+                if (row, col) in self.mines:
+                    counts[(row, col)] = -1  # -1 means mine
+                else:
+                    count = 0
+                    for r in range(max(0, row-1), min(10, row+2)):
+                        for c in range(max(0, col-1), min(10, col+2)):
+                            if (r, c) in self.mines:
+                                count += 1
+                    counts[(row, col)] = count
+        return counts
+
+    def reveal(self, row, col):
+        if (row, col) in self.mines:
+            self.buttons[(row, col)].config(text="*", bg="red")
+            self.show_mines()
+            return
+        
+        count = self.adjacency_counts[(row, col)]
+        self.buttons[(row, col)].config(text=str(count), state="disabled")
+
+        if count == 0:
+            for r in range(max(0, row-1), min(10, row+2)):
+                for c in range(max(0, col-1), min(10, col+2)):
+                    if (r, c) not in self.mines and self.buttons[(r, c)] != "disabled":
+                        self.reveal(r, c)        
+        self.check_win()
+
+    def check(self,x):
+        self.revealed_cells += x
+
+    def show_mines(self):
+        for mine in self.mines:
+            self.buttons[mine].config(text="*", bg="red")
+        self.disable_buttons()
+
+    def disable_buttons(self):
+        for button in self.buttons.values():
+            button.config(state="disabled")
+
+    def toggle_flag(self, row, col):
+        button = self.buttons[(row, col)]
+        if button["state"] == "normal":  # Если кнопка не открыта
+            if button["text"] == "F":  # Если уже есть флаг
+                button.config(text="", bg="SystemButtonFace")  # Снимаем флаг
+                self.check(x=-1)
+            else:
+                button.config(text="F", bg="yellow")  # Ставим флаг
+                self.check(x=1)
+
+    def check_win(self):
+        # Проверяем, открыты ли все ячейки, кроме мин
+        if self.revealed_cells == 10:  # 100 ячеек всего, 10 из них мины
+            self.show_win_message()
+    def show_win_message(self):
+        win_label = tk.Label(self.board_frame, text="Победа!!", font=("Ink Free", 24), fg="green")
+        win_label.grid(row=10, columnspan=10)
+        self.disable_buttons()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    game = MineSweeper(root)
+    root.mainloop()
