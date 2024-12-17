@@ -1,1 +1,135 @@
+#"""
+#Задание на л.р. №8 ООП 24
+#Требуется написать объектно-ориентированную программу с графическим интерфейсом в соответствии со своим вариантом. 
+#В программе должны быть реализованы минимум один класс*,
+#три атрибута, четыре метода (функции). 
+#Ввод данных из файла с контролем правильности ввода. 
+#Базы данных использовать нельзя.
+#При необходимости сохранять информацию в виде файлов,
+#разделяя значения запятыми или пробелами. 
+#Для GUI использовать библиотеку tkinter.
 
+#Вариант 19
+#Объекты – расчасовка дисциплин
+#Функции:
+#сегментация полного списка дисциплин по преподавателям
+#визуализация предыдущей функции в форме круговой диаграммы
+#сегментация полного дисциплин по видам учебной нагрузки
+#визуализация предыдущей функции в форме круговой диаграммы
+#"""
+
+
+from tkinter import *
+from tkinter import ttk
+from tkinter import filedialog, messagebox
+import matplotlib.pyplot as plt
+from collections import defaultdict
+
+class Discipline:
+    def __init__(self, name, teacher, load_type):
+        self.name = name
+        self.teacher = teacher
+        self.load_type = load_type
+
+class Schedule:
+    def __init__(self):
+        self.disciplines = []
+        
+
+    def load_data(self, filename):
+        self.disciplines.clear()
+        try:
+            with open(filename, 'r', encoding='utf-8') as file:
+                for line in file:
+                    parts = line.strip().split(',')
+                    if len(parts) != 3:
+                        raise ValueError("Неправильный формат данных. Ожидается 3 значения.")
+                    
+                    name, teacher, load_type = map(str.strip, parts)
+                    self.disciplines.append(Discipline(name, teacher, load_type))
+
+            messagebox.showinfo("Успех", "Данные успешно загружены.")
+            
+        except Exception as e:
+            messagebox.showerror("Ошибка", str(e))
+
+    def segment_by_teacher(self):
+        segmentation = defaultdict(int)
+        for discipline in self.disciplines:
+            segmentation[discipline.teacher] += 1
+        return dict(segmentation)
+
+    def segment_by_load_type(self):
+        segmentation = defaultdict(int)
+        for discipline in self.disciplines:
+            segmentation[discipline.load_type] += 1
+        return dict(segmentation)
+
+    def visualize_data(self, segmentation, title):
+        labels = segmentation.keys()
+        sizes = segmentation.values()
+        plt.figure(figsize=(8, 6))
+        plt.pie(sizes, labels=labels, autopct='%1.1f%%', startangle=90)
+        plt.axis('equal')
+        plt.title(title)
+        plt.show()
+
+class App:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Расписание дисциплин")
+        self.schedule = Schedule()
+
+        ttk.Button(root, text="Загрузить данные", command=self.load_data).pack(pady=10)
+        ttk.Button(root, text="Визуализировать по преподавателям", command=self.visualize_by_teacher).pack(pady=10)
+        ttk.Button(root, text="Визуализировать по видам нагрузки", command=self.visualize_by_load_type).pack(pady=10)
+
+        self.root.geometry("1000x500") 
+
+        self.table_header = ttk.Label(text="Полный список дисциплин") 
+        self.table_header.pack() 
+
+        columns = ("Дисциплина", "Преподаватель", "Вид учебной нагрузки")
+
+        self.tree = ttk.Treeview(columns=columns, show="headings")
+        self.tree.pack(fill=BOTH, expand=1)
+ 
+        def sort(col, reverse):
+            l = [(self.tree.set(k, col), k) for k in self.tree.get_children("")]
+            l.sort(reverse=reverse)
+            for index,  (_, k) in enumerate(l):
+                self.tree.move(k, "", index)
+            self.tree.heading(col, command=lambda: sort(col, not reverse))
+
+        self.tree.heading("Дисциплина", text = "Дисциплина",anchor=W, command=lambda: sort(0, False))
+        self.tree.heading("Преподаватель", text = "Преподаватель",anchor=W, command=lambda: sort(1, False))
+        self.tree.heading("Вид учебной нагрузки", text = "Вид учебной нагрузки",anchor=W, command=lambda: sort(2, False))
+    
+    def asd(self):
+        for discipline in self.schedule.disciplines:
+            self.tree.insert("", END, values=(discipline.name,discipline.teacher,discipline.load_type))
+
+    def load_data(self):
+        filename = filedialog.askopenfilename(filetypes=[("Текстовые файлы", "*.txt")])
+        if filename:
+           self.schedule.load_data(filename)
+        self.asd()    
+
+    def visualize_by_teacher(self):
+        segmentation = self.schedule.segment_by_teacher()
+        if segmentation:
+            self.schedule.visualize_data(segmentation, "Дисциплины по преподавателям")
+        else:
+            messagebox.showwarning("Предупреждение", "Нет данных для визуализации.")
+
+    def visualize_by_load_type(self):
+        segmentation = self.schedule.segment_by_load_type()
+        if segmentation:
+            self.schedule.visualize_data(segmentation, "Дисциплины по видам учебной нагрузки")
+        else:
+            messagebox.showwarning("Предупреждение", "Нет данных для визуализации.")
+
+if __name__ == "__main__":
+    root = Tk()
+    app = App(root)
+    root.mainloop()
