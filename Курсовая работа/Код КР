@@ -1,0 +1,292 @@
+
+import tkinter as tk
+from tkinter import messagebox
+
+
+class CheckersGame:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Шашки")
+        self.master.geometry('%dx%d+%d+%d' % (500, 250, 150, 50))
+        
+
+        self.menu_frame = tk.Frame(master)
+        self.menu_frame.pack()
+
+        self.login_frame = tk.Frame(master)
+
+
+        self.show_login()
+
+    def show_login(self):
+        
+        self.menu_frame.pack_forget()
+        self.login_frame.pack()
+
+        tk.Label(self.login_frame, text="Шашки Артамонова", font=("Comic Sans MS", 22)).grid(row=0, column=0,columnspan=2)
+        tk.Label(self.login_frame, text="Логин:", font=("Comic Sans MS", 18)).grid(row=1, column=0)
+        tk.Label(self.login_frame, text="Пароль:", font=("Comic Sans MS", 18)).grid(row=2, column=0)
+
+        self.username_entry = tk.Entry(self.login_frame,width=30)
+        self.password_entry = tk.Entry(self.login_frame,width=30, show="*")
+        
+        self.username_entry.grid(row=1, column=1)
+        self.password_entry.grid(row=2, column=1)
+        
+        tk.Button(self.login_frame, text="Регистрация",font=("Comic Sans MS", 15), activebackground="#00868B", bg="#E0EEEE", command=self.register).grid(row=3, column=0, columnspan=3)
+        tk.Button(self.login_frame, text="Войти",font=("Comic Sans MS", 15), activebackground="#00868B", bg="#E0EEEE",  command=self.login).grid(row=4 ,column=0, columnspan=3, )
+        
+   
+        
+    def login(self):
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+        
+        if username and password:  
+            messagebox.showinfo("Вход", "Вы успешно вошли в систему!")
+            self.show_start_menu()
+        else:
+            messagebox.showwarning("Ошибка", "Введите логин и пароль.")
+
+    def register(self):
+        messagebox.showinfo("Зарегистрироваться", "Вы успешно зарегистрировались.")
+
+    def show_start_menu(self):
+        self.login_frame.pack_forget()
+        self.menu_frame.pack()
+
+        self.label = tk.Label(self.menu_frame, text="Шашки Артамонова", font=("Comic Sans MS", 22))
+        self.label.pack(fill=tk.X, pady=20, padx =20)
+        self.button1 = tk.Button(self.menu_frame, text="Друг против друга", font=("Comic Sans MS", 15), activebackground="#00868B", bg="#E0EEEE", command=self.start_game)
+        self.button1.pack(fill=tk.X, pady=20, padx =20)
+        self.button2 = tk.Button(self.menu_frame, text="Выйти", font=("Comic Sans MS", 15), activebackground="#00868B", bg="#E0EEEE", command=self.master.quit)
+        self.button2.pack(fill=tk.X, pady=10, padx =10)
+
+    def start_game(self):
+
+        game=Game(root)
+
+        self.button1.pack_forget()
+        self.label.pack_forget()
+        self.button2.pack_forget()
+        self.menu_frame.pack_forget()
+        self.login_frame.pack_forget()
+
+class Game:
+    def __init__(self, master):
+        self.master = master
+        self.master.title("Шашки")
+        self.master.geometry('%dx%d+%d+%d' % (500, 650, 150, 50))
+        self.points_player1 = 0
+        self.points_player2 = 0
+        self.no_points_move = 0
+        self.board_size = 8
+        self.board = [[None for _ in range(self.board_size)] for _ in range(self.board_size)]
+        self.current_player = "player_1"
+        self.create_board()
+        self.populate_board()
+        self.selected_piece = None
+        self.valid_piece = None
+
+
+
+    def create_board(self):
+
+        self.canvas = tk.Canvas(self.master, width=400, height=400)
+        self.canvas.pack()
+        for row in range(self.board_size):
+            for col in range(self.board_size):
+                color = "white" if (row + col) % 2 == 0 else "grey"
+                self.canvas.create_rectangle(col * 50, row * 50, col * 50 + 50, row * 50 + 50, fill=color)
+        
+        self.canvas.bind("<Button-1>", self.click)
+        self.gamer_label = tk.Label(self.master, text="Ход Первого игрока", font=("Comic Sans MS", 15))
+        self.gamer_label.pack()
+        self.points_label =  tk.Label(self.master, text="0 / 0", font=("Comic Sans MS", 35))
+        self.points_label.pack()
+        self.button_quit = tk.Button(self.master, text="Выйти", font=("Comic Sans MS", 15), activebackground="#00868B", bg="#E0EEEE", command=self.master.quit)
+        self.button_quit.pack()
+
+    def populate_board(self):
+        for row in range(3):
+            for col in range(self.board_size):
+                if (row + col) % 2 == 1:
+                    piece = self.canvas.create_oval(col * 50 + 5, row * 50 + 5, col * 50 + 45, row * 50 + 45, fill="white")
+                    self.board[row][col] = piece
+        for row in range(5, 8):
+            for col in range(self.board_size):
+                if (row + col) % 2 == 1:
+                    piece = self.canvas.create_oval(col * 50 + 5, row * 50 + 5, col * 50 + 45, row * 50 + 45, fill="white")
+                    self.board[row][col] = piece
+
+    def click(self, event):
+        col = event.x // 50
+        row = event.y // 50
+        print(self.current_player)
+        
+        if self.selected_piece is None:
+            piece = self.board[row][col]
+            if piece and self.valid_piece != (row, col):
+                self.selected_piece = (row, col)
+                
+        else:
+            if self.move_piece(row, col) and self.valid_piece != (row, col):
+                self.create_king(row, col)
+                self.check_game_end()
+                self.switch_player()
+            self.selected_piece = None
+    
+    def is_piece_a_king(self, row, col):     
+        if self.canvas.itemcget("king", "fill") == "black":
+            return True
+
+    def move_piece(self, row, col):
+        
+        start_row, start_col = self.selected_piece
+        piece = self.board[start_row][start_col]
+        self.valid_piece = (start_row, start_col)
+        if self.is_valid_move(start_row, start_col, row, col):
+            
+            self.canvas.move(piece, (col - start_col) * 50, (row - start_row) * 50)
+            self.board[row][col] = piece
+            self.board[start_row][start_col] = None
+            if abs(row - start_row) == 2 and abs(col - start_col) == 2:
+                self.no_points_move = 0
+                mid_row = (start_row + row) // 2
+                mid_col = (start_col + col) // 2
+                piece2 = self.board[mid_row][mid_col]
+                self.canvas.delete(piece2)
+                self.board[mid_row][mid_col] = None
+                if self.current_player == "player_1":
+                    self.points_player1 += 1
+                else:
+                    self.points_player2 += 1
+            elif self.is_piece_a_king(start_row, start_col):
+                self.no_points_move = 0
+                print("дамка ходила")
+                row_diff = row - start_row
+                col_diff = col - start_col
+        
+                row_dir = 1 if row_diff > 0 else -1
+                col_dir = 1 if col_diff > 0 else -1
+        
+                curr_row, curr_col = start_row + row_dir, start_col + col_dir
+                
+                while curr_row != row:
+                    if self.board[curr_row][curr_col] is not None:
+                        piece3 = self.board[curr_row][curr_col]
+                        self.board[curr_row][curr_col] = None
+                        self.canvas.delete(piece3)
+                        if self.current_player == "player_1":
+                            self.points_player1 += 1
+                        else:
+                            self.points_player2 += 1
+
+                    curr_row += row_dir
+                    curr_col += col_dir
+                
+                
+            else:
+                 self.no_points_move += 1               
+            print(self.points_player1, self.points_player2)
+            return True
+        
+        
+        return False
+
+    def is_valid_move(self, start_row, start_col, end_row, end_col):
+
+        row_diff = abs(end_row - start_row)
+        col_diff = abs(end_col - start_col)
+   
+        if (0 <= end_row < self.board_size and 0 <= end_col < self.board_size and self.board[end_row][end_col] is None):
+            if row_diff == 1 and col_diff == 1:
+                if (self.current_player ==  "player_1" and start_row - end_row > 0): 
+                    return True
+                elif (self.current_player ==  "player_2" and start_row - end_row < 0):
+                    return True
+                else:
+                    return False
+            elif row_diff == 2 and col_diff == 2:
+                mid_row = (start_row + end_row) // 2
+                mid_col = (start_col + end_col) // 2
+                if self.board[mid_row][mid_col] is not None:
+                    return True 
+                else:
+                    return False
+
+            elif self.is_piece_a_king(start_row, start_col):
+                if self.is_valid_king_move(start_row, start_col, end_row, end_col):
+                    return True
+            else:
+                 return False
+        else:
+            return False
+
+
+    def create_king(self, row, cow):
+        if row == 0 and self.current_player == "player_1":
+
+            piece= self.board[row][cow]
+            self.canvas.itemconfig(piece, fill="black",tag="king")
+        if row == 7 and self.current_player == "player_2":
+
+            piece= self.board[row][cow]
+            self.canvas.itemconfig(piece, fill="black")
+
+    def is_valid_king_move(self, start_row, start_col, end_row, end_col):
+        if self.board[end_row][end_col] is not None:
+            return False
+        
+        row_diff = end_row - start_row
+        col_diff = end_col - start_col
+        
+        if abs(row_diff) != abs(col_diff): # дамка может ходить только по диагонали
+            return False
+        
+        row_dir = 1 if row_diff > 0 else -1
+        col_dir = 1 if col_diff > 0 else -1
+        
+        curr_row, curr_col = start_row + row_dir, start_col + col_dir
+        number_point=0
+        while curr_row != end_row:
+            if self.board[curr_row][curr_col] is not None:
+                number_point+=1 
+            curr_row += row_dir
+            curr_col += col_dir
+        if number_point!=1 and number_point!=0:
+            return False
+        return True
+
+    def check_game_end(self):
+        white_pieces = 0
+        for row in range(self.board_size):
+            for col in range(self.board_size):
+                if self.board[row][col] is not None:
+                    white_pieces += 1
+        if white_pieces == 1:
+            self.show_winner_message()
+        if  self.no_points_move == 15:
+            self.show_winner_message()
+
+
+    def show_winner_message(self):
+         if self.points_player1 > self.points_player2:
+            messagebox.showinfo("Конец игры", "Победил Игрок 1 !!")
+         else:
+            messagebox.showinfo("Конец игры", "Победил Игрок 2 !!")
+
+
+    def switch_player(self):
+        self.points_label['text'] = f'{self.points_player1} / {self.points_player2}'
+        self.current_player = "player_1" if self.current_player == "player_2" else "player_2"
+        print("Ход Игрока",self.current_player)
+        if self.current_player == "player_1":
+            self.gamer_label['text'] = "Ход Первого игрока"
+        else:
+            self.gamer_label['text'] = "Ход Второго игрока"
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    game = CheckersGame(root)
+    root.mainloop()
